@@ -1,0 +1,117 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum FileType {
+  IMAGE
+  VIDEO
+  AUDIO
+}
+
+model File {
+  id           String    @id @default(uuid())
+  originalName String    @db.VarChar(100)
+  bucket       String    @db.VarChar(50)
+  key          String    @unique @db.VarChar(36)
+  url          String    @unique @db.VarChar(255)
+  fileType     FileType  @default(IMAGE)
+  size         Int
+  AvatarFile   User[]
+  Message      Message[]
+}
+
+model User {
+  userId               String        @id @default(uuid())
+  firstName            String        @db.VarChar(20)
+  lastName             String        @db.VarChar(20)
+  email                String        @unique @db.VarChar(50)
+  userName             String        @unique @db.VarChar(20)
+  passwordHash         String        @db.VarChar(255)
+  refreshToken         String?       @unique @db.VarChar(255)
+  bio                  String?       @db.VarChar(500)
+  avatarFile           File?         @relation(fields: [avatarFileId], references: [id])
+  registeredAt         DateTime      @default(now())
+  notificationsEnabled Boolean       @default(true)
+  isVisible            Boolean       @default(true)
+  Room                 Room[]
+  avatarFileId         String?
+  FriendSender         Friend[]      @relation(name: "friend-sender")
+  FriendReceiver       Friend[]      @relation(name: "friend-receiver")
+  MessageSender        Message[]     @relation(name: "message-sender")
+  MessageReceiver      Message[]     @relation(name: "message-receiver")
+  Participant          Participant[]
+  InviteReceiver       Invite[]      @relation(name: "invite-receiver")
+  InviteSender         Invite[]      @relation(name: "invite-sender")
+}
+
+model Friend {
+  sender        User     @relation(name: "friend-sender", fields: [senderId], references: [userId])
+  senderId      String
+  receiver      User     @relation(name: "friend-receiver", fields: [receiverId], references: [userId])
+  receiverId    String
+  dateSent      DateTime @default(now())
+  dateResponded DateTime @updatedAt
+  isActive      Boolean
+
+  @@id([senderId, receiverId])
+}
+
+model Room {
+  roomId      String    @id @default(uuid())
+  title       String    @unique @db.VarChar(50)
+  description String    @db.VarChar(250)
+  owner       User      @relation(fields: [ownerId], references: [userId])
+  ownerId     String
+  isActive    Boolean
+  isPublic    Boolean
+  Message     Message[]
+  Invite      Invite[]
+}
+
+model Message {
+  messageId   String   @id @default(uuid())
+  sender      User     @relation(name: "message-sender", fields: [senderId], references: [userId])
+  senderId    String
+  toUser      User?    @relation(name: "message-receiver", fields: [toUserId], references: [userId])
+  toUserId    String?
+  room        Room?    @relation(fields: [roomId], references: [roomId])
+  roomId      String?
+  content     String?  @db.VarChar(250)
+  file        File?    @relation(fields: [fileId], references: [id])
+  fileId      String?
+  dateSent    DateTime @default(now())
+  dateUpdated DateTime @updatedAt
+}
+
+model Participant {
+  participantId String    @id @default(uuid())
+  user          User      @relation(fields: [userId], references: [userId])
+  userId        String
+  dateJoined    DateTime  @default(now())
+  dateLeft      DateTime?
+  isActive      Boolean
+}
+
+model Invite {
+  inviteId       String   @id @default(uuid())
+  room           Room     @relation(fields: [roomId], references: [roomId])
+  roomId         String
+  sender         User     @relation(name: "invite-sender", fields: [senderId], references: [userId])
+  senderId       String
+  receiver       User     @relation(name: "invite-receiver", fields: [receiverId], references: [userId])
+  receiverId     String
+  inviteAccepted Boolean
+  dateSent       DateTime @default(now())
+  dateResponded  DateTime @updatedAt
+}
