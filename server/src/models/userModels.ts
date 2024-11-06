@@ -29,15 +29,24 @@ export const baseUser = z.object({
     .string()
     .email("Invalid email address")
     .max(50, "Email must be at most 50 characters"),
-  password: z
+  password: z.string().regex(
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,16}$/,
+    `Password must be between 8 and 16 characters long and 
+include at least one uppercase letter, one lowercase letter, one digit, 
+and one special character (e.g., @$!%*?&).`
+  ),
+  confirmPassword: z.string().regex(
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,16}$/,
+    `Password must be between 8 and 16 characters long and 
+include at least one uppercase letter, one lowercase letter, one digit, 
+and one special character (e.g., @$!%*?&).`
+  ),
+  userName: z
     .string()
-    .min(8, "Password must be at least 8 characters")
-    .max(16, "Password must be at most 16 characters"),
-  confirmPassword: z
-    .string()
-    .min(8, "Confirm password must be at least 8 characters")
-    .max(16, "Confirm password must be at most 16 characters"),
-  userName: z.string(),
+    .regex(
+      /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{6,12}$/,
+      "Your username must include one uppercase letter, one lowercase letter, one digit, and be between 6 and 12 characters long."
+    ),
 });
 
 export const updateUserSchema = z.object({

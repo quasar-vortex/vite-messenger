@@ -28,5 +28,6 @@ authRouter
     valMiddleware(loginUserModel),
     authController.loginUserHandler
   )
+  // This route checkes for cookie itself, authmiddleware gets bearer tokens from headers
   .get("/refresh", authController.refreshUserHandler)
   .get("/logoff", authMiddleware, authController.logOffUserHandler);
