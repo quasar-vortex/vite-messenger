@@ -30,4 +30,7 @@ authRouter
   )
   // This route checkes for cookie itself, authmiddleware gets bearer tokens from headers
   .get("/refresh", authController.refreshUserHandler)
-  .get("/logoff", authMiddleware, authController.logOffUserHandler);
+  .get("/logoff", authController.logOffUserHandler) // log off goes off http only cookie
+  .get("/protected", authMiddleware, (req, res, next) => {
+    res.status(200).json({ message: "You are logged in" });
+  });

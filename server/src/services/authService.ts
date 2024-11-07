@@ -14,6 +14,7 @@ export const registerUser = async (data: RegisterUserModel) => {
   const foundUser = await db.user.findFirst({
     where: { OR: [{ email: data.email }, { userName: data.userName }] },
   });
+
   // If user exists throw error
   if (foundUser)
     throw new HttpError({
@@ -57,108 +58,104 @@ export const registerUser = async (data: RegisterUserModel) => {
 };
 
 export const loginUser = async (data: LoginUserModel) => {
-  try {
-    // Check if the user exists with provided email or username
-    const foundUser = await db.user.findUnique({
-      where: { email: data.email },
-      select: { ...baseUserSelect, avatarFile: true, passwordHash: true },
-    });
+  const foundUser = await db.user.findUnique({
+    where: { email: data.email },
+    select: { ...baseUserSelect, avatarFile: true, passwordHash: true },
+  });
 
-    if (!foundUser) {
-      throw new HttpError({
-        status: "NOT_FOUND",
-        message: "User not found",
-      });
-    }
-    const { passwordHash, ...restOfFoundUser } = foundUser;
-    // Verify the provided password
-    const isPasswordValid = await verifyHashedPassword(
-      data.password,
-      passwordHash
-    );
-
-    if (!isPasswordValid) {
-      throw new HttpError({
-        status: "NOT_AUTHORIZED",
-        message: "Invalid credentials",
-      });
-    }
-
-    // Create access and refresh tokens
-    const accessToken = signUserToken({
-      type: "ACCESS_TOKEN",
-      payload: { id: foundUser.userId },
-    });
-
-    const refreshToken = signUserToken({
-      type: "REFRESH_TOKEN",
-      payload: { id: foundUser.userId },
-    });
-
-    // Update the refresh token in the database
-    await db.user.update({
-      where: { userId: foundUser.userId },
-      data: { refreshToken },
-    });
-
-    return { user: restOfFoundUser, tokens: { accessToken, refreshToken } };
-  } catch (error) {
+  if (!foundUser) {
     throw new HttpError({
-      status: "INTERNAL_ERROR",
-      message: "Failed to log in user",
+      status: "NOT_FOUND",
+      message: "User not found",
     });
   }
+  const { passwordHash, ...restOfFoundUser } = foundUser;
+  // Verify the provided password
+  const isPasswordValid = await verifyHashedPassword(
+    passwordHash,
+    data.password
+  );
+
+  if (!isPasswordValid) {
+    throw new HttpError({
+      status: "NOT_AUTHORIZED",
+      message: "Invalid credentials",
+    });
+  }
+
+  // Create access and refresh tokens
+  const accessToken = signUserToken({
+    type: "ACCESS_TOKEN",
+    payload: { id: foundUser.userId },
+  });
+
+  const refreshToken = signUserToken({
+    type: "REFRESH_TOKEN",
+    payload: { id: foundUser.userId },
+  });
+
+  // Update the refresh token in the database
+  await db.user.update({
+    where: { userId: foundUser.userId },
+    data: { refreshToken },
+  });
+
+  return { user: restOfFoundUser, tokens: { accessToken, refreshToken } };
 };
 
 export const refreshUser = async (refreshToken: string) => {
-  try {
-    // Verify the refresh token using your auth utils
-    const decodedPayload = await verifyUserToken({
-      payload: refreshToken,
-      type: "REFRESH_TOKEN",
-    });
+  // Verify the refresh token using your auth utils
+  const decodedPayload = await verifyUserToken({
+    payload: refreshToken,
+    type: "REFRESH_TOKEN",
+  });
 
-    // Fetch user from database based on userId in payload
-    const foundUser = await db.user.findUnique({
-      where: { userId: decodedPayload.id },
-      select: { ...baseUserSelect, avatarFile: true },
-    });
+  // Fetch user from database based on userId in payload
+  const foundUser = await db.user.findUnique({
+    where: { userId: decodedPayload.id },
+    select: { ...baseUserSelect, avatarFile: true },
+  });
 
-    if (!foundUser) {
-      throw new HttpError({
-        status: "NOT_FOUND",
-        message: "User not found",
-      });
-    }
-
-    // Create a new access token
-    const accessToken = signUserToken({
-      type: "ACCESS_TOKEN",
-      payload: { id: decodedPayload.id },
-    });
-
-    return { user: foundUser, tokens: { accessToken } };
-  } catch (error) {
+  if (!foundUser) {
     throw new HttpError({
-      status: "NOT_AUTHORIZED",
-      message: "Invalid refresh token",
+      status: "NOT_FOUND",
+      message: "User not found",
     });
   }
+
+  // Create a new access token
+  const accessToken = signUserToken({
+    type: "ACCESS_TOKEN",
+    payload: { id: decodedPayload.id },
+  });
+
+  return { user: foundUser, tokens: { accessToken } };
 };
 
-export const logOffUser = async (userId: string) => {
-  try {
-    // Delete the refresh token from the database for the user
-    await db.user.update({
-      where: { userId },
-      data: { refreshToken: null },
-    });
+export const logOffUser = async (refreshToken: string) => {
+  // Verify the refresh token using your auth utils
+  const decodedPayload = await verifyUserToken({
+    payload: refreshToken,
+    type: "REFRESH_TOKEN",
+  });
 
-    return { message: "User Signed Out" };
-  } catch (error) {
+  // Fetch user from database based on userId in payload
+  const foundUser = await db.user.findUnique({
+    where: { userId: decodedPayload.id },
+    select: { ...baseUserSelect, avatarFile: true },
+  });
+
+  if (!foundUser) {
     throw new HttpError({
-      status: "INTERNAL_ERROR",
-      message: "Failed to log off user",
+      status: "NOT_FOUND",
+      message: "User not found",
     });
   }
+  // Delete the refresh token from the database for the user
+  await db.user.update({
+    where: { userId: foundUser.userId },
+    data: { refreshToken: null },
+  });
+
+  return { message: "User Signed Out" };
 };

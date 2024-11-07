@@ -6,10 +6,10 @@ Real time socket chat application built with React, Redux Toolkit, Socket.IO, Ex
 
 #### Authentication
 
-- [ ] Register User - validate request body, hash password, save to the DB and create JWTs
-- [ ] Login User - verify login credentials, generate access and refresh JWTs
-- [ ] Refresh User - Verify refresh token and generate new access token
-- [ ] Log Off User - Clear the refresh token and log off
+- [x] Register User - validate request body, hash password, save to the DB and create JWTs
+- [x] Login User - verify login credentials, generate access and refresh JWTs
+- [x] Refresh User - Verify refresh token and generate new access token
+- [x] Log Off User - Clear the refresh token and log off
 
 #### Users
 
@@ -47,10 +47,10 @@ Real time socket chat application built with React, Redux Toolkit, Socket.IO, Ex
 ##### API Design
 
 - Authentication
-  - POST /auth/register
-  - POST /auth/login
-  - POST /auth/refresh
-  - POST /auth/logout
+  - [x] POST /auth/register
+  - [x] POST /auth/login
+  - [x] POST /auth/refresh
+  - [x] POST /auth/logout
 - Users
   - GET /users/:id
   - GET /users/me
@@ -61,9 +61,7 @@ Real time socket chat application built with React, Redux Toolkit, Socket.IO, Ex
 - Friends
   - POST /friends/request - Send a friend request - also send event
   - POST /friends/response - Send a response to a request - also send real time event
-  - GET /friends - Get signed in friends
-  - GET /friends/requests - Get signed in user's friend requests
-  - DELETE /friends/:id - Remove friend
+  - DELETE /friends/:friendUserId - Remove friend
 - Files
   - POST /files/upload
   - GET /files/:id

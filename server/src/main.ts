@@ -19,11 +19,9 @@ app.get("/api/v1/health", (req, res, next) => {
 app.use("/api/v1/auth", authRouter);
 
 const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
-  if (err instanceof HttpError) {
-    res.status(err.statusCode).json({ message: err.message });
-    return;
-  }
-  res.status(500).json({ message: "Internal Error" });
+  res
+    .status(err?.statusCode || 500)
+    .json({ message: err?.message || "Internal Error" });
 };
 app.use(errorHandler);
 

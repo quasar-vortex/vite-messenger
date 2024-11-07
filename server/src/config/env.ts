@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 export const accessConfig = {
-  expiresIn: "15m",
+  expiresIn: "30m",
   secret: process.env.JWT_ACCESS_SECRET!,
 };
 

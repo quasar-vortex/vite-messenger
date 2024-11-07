@@ -6,12 +6,17 @@ export const baseUserSelect = {
   email: true,
   firstName: true,
   lastName: true,
-  avatar: true,
   isVisible: true,
-  lastActive: true,
   bio: true,
   notificationsEnabled: true,
   registeredAt: true,
+};
+
+export const otherUserSelect = {
+  userId: true,
+  userName: true,
+  bio: true,
+  avatarUrl: true,
 };
 
 export type BaseUser = z.infer<typeof baseUser>;
@@ -44,16 +49,32 @@ and one special character (e.g., @$!%*?&).`
   userName: z
     .string()
     .regex(
-      /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{6,12}$/,
-      "Your username must include one uppercase letter, one lowercase letter, one digit, and be between 6 and 12 characters long."
+      /^(?=.*[a-z])(?=.*\d).{6,12}$/,
+      "Your username can only include lowercase letters, one digit, and be between 6 and 12 characters long."
     ),
 });
 
 export const updateUserSchema = z.object({
   body: z.object({
     bio: z.string().max(200).optional(),
-    avatarFileId: z.string().max(36).optional(),
-    password: z.string().min(8).max(16).optional(),
+    password: z
+      .string()
+      .regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,16}$/,
+        `Password must be between 8 and 16 characters long and 
+  include at least one uppercase letter, one lowercase letter, one digit, 
+  and one special character (e.g., @$!%*?&).`
+      )
+      .optional(),
+    newPasword: z
+      .string()
+      .regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,16}$/,
+        `Password must be between 8 and 16 characters long and 
+  include at least one uppercase letter, one lowercase letter, one digit, 
+  and one special character (e.g., @$!%*?&).`
+      )
+      .optional(),
     isVisible: z.boolean().optional(),
     notificationsEnabled: z.boolean().optional(),
   }),
