@@ -10,6 +10,7 @@ Real time socket chat application built with React, Redux Toolkit, Socket.IO, Ex
 - [x] Login User - verify login credentials, generate access and refresh JWTs
 - [x] Refresh User - Verify refresh token and generate new access token
 - [x] Log Off User - Clear the refresh token and log off
+- Authentication has been configured on the front end for user register, sign in, refresh and sign out
 
 #### Users
 

@@ -49,15 +49,11 @@ const SideBar = () => {
     setShouldSignOut(true);
   };
   useEffect(() => {
+    if (isError) console.log("Something went wrong with sign out.");
     if (shouldSignOut && !isLoading && data) {
       toast.success(data?.message);
       dispatch(removeCreds());
-      nav("/login");
-    }
-    if (isError) {
-      console.log("Something went wrong with sign out.");
-      dispatch(removeCreds());
-      nav("/login");
+      nav("/");
     }
   }, [data, isError, isLoading, shouldSignOut]);
   return (

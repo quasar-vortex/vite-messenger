@@ -6,7 +6,7 @@ import { Navigate } from "react-router-dom";
 
 const ProtectedDash = () => {
   const isLoggedIn = useSelector(selectIsLoggedIn);
-  return isLoggedIn ? <DashLayout /> : <Navigate to="/login" replace />;
+  return isLoggedIn ? <DashLayout /> : <Navigate to="/" replace />;
 };
 
 export default ProtectedDash;
