@@ -47,7 +47,12 @@ export const updateUserHandler = async (
     data: updatePayload,
     select: { ...baseUserSelect, avatarFile: true },
   });
-  return updatedUser;
+  const { avatarFile, ...restOfUser } = updatedUser;
+  const payload = {
+    ...restOfUser,
+    avatarUrl: avatarFile?.url,
+  };
+  return payload;
 };
 export const getSignedInUserHandler = async (userId: string) => {
   // Find user in DB
@@ -62,7 +67,12 @@ export const getSignedInUserHandler = async (userId: string) => {
       message: "User not found",
     });
   }
-  return foundUser;
+  const { avatarFile, ...restOfUser } = foundUser;
+  const payload = {
+    ...restOfUser,
+    avatarUrl: avatarFile?.url,
+  };
+  return payload;
 };
 export const getUserByIdHandler = async (userId: string) => {
   // Find the user

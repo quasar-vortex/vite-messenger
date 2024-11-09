@@ -1,5 +1,7 @@
 import z from "zod";
+import { FormFieldProps } from "../components/FormField";
 
+import { FiLock, FiMail, FiUser } from "react-icons/fi";
 export const registerModel = z.object({
   firstName: z
     .string()
@@ -24,3 +26,35 @@ export const registerModel = z.object({
   userName: z.string(),
 });
 export type RegisterModel = z.infer<typeof registerModel>;
+export const registerFields: FormFieldProps[] = [
+  {
+    icon: FiUser,
+    name: "firstName",
+    type: "TEXT",
+    placeholder: "First Name",
+  },
+  {
+    icon: FiUser,
+    name: "lastName",
+    type: "TEXT",
+    placeholder: "Last Name",
+  },
+  {
+    icon: FiMail,
+    name: "email",
+    type: "EMAIL",
+    placeholder: "Email",
+  },
+  {
+    icon: FiLock,
+    name: "password",
+    type: "PASSWORD",
+    placeholder: "Password",
+  },
+  {
+    icon: FiLock,
+    name: "confirmPassword",
+    type: "PASSWORD",
+    placeholder: "Confirm Password",
+  },
+];

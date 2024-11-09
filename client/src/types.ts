@@ -8,6 +8,5 @@ export type User = {
   registeredAt: Date;
   notificationsEnabled: boolean;
   isVisible: boolean;
-  avatar: never;
-  lastActive: never;
+  avatarUrl?: string | null;
 };

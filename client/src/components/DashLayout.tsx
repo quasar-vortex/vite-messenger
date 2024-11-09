@@ -1,12 +1,19 @@
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   FiUser,
   FiUsers,
   FiLayers,
   FiMessageCircle,
   FiSettings,
+  FiChevronRight,
 } from "react-icons/fi";
 import { NavLink } from "react-router-dom";
+import useAutoTimedRefresh from "../hooks/useAutoTimedRefresh";
+import { useDispatch } from "react-redux";
+import { removeCreds } from "../store/slices/authSlice";
+import { useLogoffQuery } from "../store/api/authApi";
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 const navLinks = [
   {
@@ -32,6 +39,27 @@ const navLinks = [
 ];
 
 const SideBar = () => {
+  const [shouldSignOut, setShouldSignOut] = useState(false);
+  const dispatch = useDispatch();
+  const nav = useNavigate();
+  const { data, isError, isLoading } = useLogoffQuery(null, {
+    skip: !shouldSignOut,
+  });
+  const handleSignOff = () => {
+    setShouldSignOut(true);
+  };
+  useEffect(() => {
+    if (shouldSignOut && !isLoading && data) {
+      toast.success(data?.message);
+      dispatch(removeCreds());
+      nav("/login");
+    }
+    if (isError) {
+      console.log("Something went wrong with sign out.");
+      dispatch(removeCreds());
+      nav("/login");
+    }
+  }, [data, isError, isLoading, shouldSignOut]);
   return (
     <aside className="border-r-2 border-zinc-300 flex basis-[20%] max-w-32 flex-col justify-between">
       <div className="p-4">
@@ -56,9 +84,13 @@ const SideBar = () => {
         ))}
       </ul>
       <div className="p-4 flex justify-center">
-        <button className="flex flex-col gap-1 items-center duration-200 hover:bg-zinc-300 p-2 rounded-md bg-zinc-200">
-          <FiSettings />
-          <span>Settings</span>
+        <button
+          disabled={isLoading}
+          onClick={handleSignOff}
+          className="flex flex-col gap-1 items-center duration-200 hover:bg-zinc-300 p-2 rounded-md bg-zinc-200"
+        >
+          <FiChevronRight />
+          <span>Log Off</span>
         </button>
       </div>
     </aside>
@@ -92,6 +124,7 @@ const PlaceHolder = () => {
   );
 };
 const DashLayout = () => {
+  useAutoTimedRefresh();
   const { pathname } = useLocation();
   return (
     <>

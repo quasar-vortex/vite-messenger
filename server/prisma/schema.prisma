@@ -20,7 +20,7 @@ enum FileType {
 }
 
 model File {
-  id           String    @id @default(uuid())
+  fileId           String    @id @default(uuid())
   originalName String    @db.VarChar(100)
   bucket       String    @db.VarChar(50)
   key          String    @unique @db.VarChar(36)
@@ -40,7 +40,7 @@ model User {
   passwordHash         String        @db.VarChar(255)
   refreshToken         String?       @unique @db.VarChar(255)
   bio                  String?       @db.VarChar(500)
-  avatarFile           File?         @relation(fields: [avatarFileId], references: [id])
+  avatarFile           File?         @relation(fields: [avatarFileId], references: [fileId])
   registeredAt         DateTime      @default(now())
   notificationsEnabled Boolean       @default(true)
   isVisible            Boolean       @default(true)
@@ -88,7 +88,7 @@ model Message {
   room        Room?    @relation(fields: [roomId], references: [roomId])
   roomId      String?
   content     String?  @db.VarChar(250)
-  file        File?    @relation(fields: [fileId], references: [id])
+  file        File?    @relation(fields: [fileId], references: [fileId])
   fileId      String?
   dateSent    DateTime @default(now())
   dateUpdated DateTime @updatedAt

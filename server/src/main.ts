@@ -6,12 +6,16 @@ import HttpError from "./config/httpError";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import { truncateAllFiles } from "./utils/uploadUtils";
-
+const corsOptions = {
+  origin: "http://localhost:3000",
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  credentials: true,
+};
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(cors({ origin: "*" }));
+app.use(cors(corsOptions));
 
 app.get("/api/v1/health", (req, res, next) => {
   res.sendStatus(200);

@@ -1,22 +1,10 @@
+import { useSelector } from "react-redux";
 import { NavLink } from "react-router-dom";
+import { selectUserInfo } from "../store/slices/authSlice";
 
-type Props = {
-  username: string;
-  bio: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  dateJoined: string;
-};
-
-const Profile = ({
-  username,
-  bio,
-  firstName,
-  lastName,
-  email,
-  dateJoined,
-}: Props) => {
+const Profile = () => {
+  const { bio, userName, firstName, lastName, email, avatarUrl, registeredAt } =
+    useSelector(selectUserInfo)!;
   return (
     <section className="mx-auto w-full">
       {/* Header */}
@@ -42,15 +30,14 @@ const Profile = ({
         <div className="bg-zinc-100 flex flex-col items-center  border-2 border-zinc-300 p-6 rounded-lg shadow-md w-full max-w-lg">
           <div className="avatar">
             <div className="ring-primary ring-offset-base-100 w-24 rounded-full ring ring-offset-2">
-              <img src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
+              <img src={avatarUrl || "https://i.pravatar.cc/200"} />
             </div>
           </div>
           <h2 className="mt-4 text-xl font-semibold">
-            {username || "username"}
+            {userName || "username"}
           </h2>
           <p className="text-gray-700 mt-1 text-center">
-            {bio ||
-              "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Mollitia incidunt reprehenderit neque dolor ex, saepe consequatur vel laudantium eaque accusantium."}{" "}
+            {bio || "There is no bio to share :("}{" "}
           </p>
 
           {/* User Details */}
@@ -58,7 +45,8 @@ const Profile = ({
             <span className="font-bold">First Name:</span> {firstName}
             <span className="font-bold">Last Name:</span> {lastName}
             <span className="font-bold">Email:</span> {email}
-            <span className="font-bold">Date Joined:</span> {dateJoined}
+            <span className="font-bold">Date Joined:</span>{" "}
+            {new Date(registeredAt).toDateString()}
           </div>
         </div>
       </div>

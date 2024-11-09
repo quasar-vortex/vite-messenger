@@ -31,4 +31,6 @@ export const authSlice = createSlice({
 export const { setCreds, removeCreds } = authSlice.actions;
 
 export const selectIsLoggedIn = (state: RootState) => state.auth.user !== null;
+export const selectAccessToken = (state: RootState) => state.auth.accessToken;
+export const selectUserInfo = (state: RootState) => state.auth.user;
 export default authSlice.reducer;
