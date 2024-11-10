@@ -1,5 +1,6 @@
 import { db } from "../config/db";
 import HttpError from "../config/httpError";
+import logger from "../config/logger";
 import { LoginUserModel, RegisterUserModel } from "../models/authModels";
 import { baseUserSelect } from "../models/userModels";
 import {
@@ -10,17 +11,20 @@ import {
 } from "../utils/authUtils";
 
 export const registerUser = async (data: RegisterUserModel) => {
+  logger.info("Register User Started");
   // Check if the user exists
   const foundUser = await db.user.findFirst({
     where: { OR: [{ email: data.email }, { userName: data.userName }] },
   });
 
   // If user exists throw error
-  if (foundUser)
+  if (foundUser) {
+    logger.error("Register User Failed, Email or Username in use.");
     throw new HttpError({
       status: "BAD_REQUEST",
       message: "Email or Username Exists",
     });
+  }
 
   // Create user
   const passwordHash = await hashPassword(data.password);
@@ -54,16 +58,22 @@ export const registerUser = async (data: RegisterUserModel) => {
   });
 
   const payload = { user: newUser, tokens };
+
+  logger.error("Register User Succeeded", { userId: newUser.userId });
   return payload;
 };
 
 export const loginUser = async (data: LoginUserModel) => {
+  logger.info("Login User Started");
   const foundUser = await db.user.findUnique({
     where: { email: data.email },
     select: { ...baseUserSelect, avatarFile: true, passwordHash: true },
   });
 
   if (!foundUser) {
+    logger.error("Unable to sign in user, account not found.", {
+      email: data.email,
+    });
     throw new HttpError({
       status: "NOT_FOUND",
       message: "User not found",
@@ -77,6 +87,9 @@ export const loginUser = async (data: LoginUserModel) => {
   );
 
   if (!isPasswordValid) {
+    logger.error("Unable to sign in user, credentials invalid.", {
+      userId: foundUser.userId,
+    });
     throw new HttpError({
       status: "NOT_AUTHORIZED",
       message: "Invalid credentials",
@@ -99,11 +112,12 @@ export const loginUser = async (data: LoginUserModel) => {
     where: { userId: foundUser.userId },
     data: { refreshToken },
   });
-
+  logger.info("Login User Completed");
   return { user: restOfFoundUser, tokens: { accessToken, refreshToken } };
 };
 
 export const refreshUser = async (refreshToken: string) => {
+  logger.info("Refresh User Started");
   // Verify the refresh token using your auth utils
   const decodedPayload = await verifyUserToken({
     payload: refreshToken,
@@ -117,6 +131,9 @@ export const refreshUser = async (refreshToken: string) => {
   });
 
   if (!foundUser) {
+    logger.info("Refresh User Failed, User Not Found.", {
+      userId: decodedPayload.id,
+    });
     throw new HttpError({
       status: "NOT_FOUND",
       message: "User not found",
@@ -129,10 +146,12 @@ export const refreshUser = async (refreshToken: string) => {
     payload: { id: decodedPayload.id },
   });
 
+  logger.info("User Refreshed Successfully");
   return { user: foundUser, tokens: { accessToken } };
 };
 
 export const logOffUser = async (refreshToken: string) => {
+  logger.info("Log Off User Started");
   // Verify the refresh token using your auth utils
   const decodedPayload = await verifyUserToken({
     payload: refreshToken,
@@ -146,6 +165,9 @@ export const logOffUser = async (refreshToken: string) => {
   });
 
   if (!foundUser) {
+    logger.info("Log Off User Failed, User Not Found", {
+      userId: decodedPayload.id,
+    });
     throw new HttpError({
       status: "NOT_FOUND",
       message: "User not found",
@@ -156,6 +178,6 @@ export const logOffUser = async (refreshToken: string) => {
     where: { userId: foundUser.userId },
     data: { refreshToken: null },
   });
-
+  logger.info("User Signed Out");
   return { message: "User Signed Out" };
 };

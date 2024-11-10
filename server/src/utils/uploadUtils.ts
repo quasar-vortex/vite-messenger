@@ -106,7 +106,6 @@ export const upload = multer({
     const { audio, image, video } = allowedMimeTypes;
     const all = [...audio, ...image, ...video];
     if (!all.includes(file.mimetype)) {
-      console.log(file.mimetype);
       cb(
         new HttpError({
           status: "BAD_REQUEST",
@@ -142,5 +141,15 @@ export const truncateAllFiles = async () => {
     await db.file.deleteMany();
   } catch (error) {
     console.log(error);
+  }
+};
+
+export const deleteObject = async (key: string) => {
+  try {
+    return s3.send(
+      new DeleteObjectCommand({ Bucket: s3Config.bucket, Key: key })
+    );
+  } catch (error) {
+    console.log;
   }
 };

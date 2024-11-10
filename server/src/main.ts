@@ -1,11 +1,11 @@
 import express, { ErrorRequestHandler } from "express";
 import { authRouter } from "./routes/authRoutes";
-import { appConfig, s3Config } from "./config/env";
+import { appConfig } from "./config/env";
 import { db } from "./config/db";
-import HttpError from "./config/httpError";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import { truncateAllFiles } from "./utils/uploadUtils";
+import logger from "./config/logger";
 const corsOptions = {
   origin: "http://localhost:3000",
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
@@ -35,10 +35,13 @@ if (process.argv[2] === "--truncate") {
 
 const main = async () => {
   try {
+    logger.info("Connecting to database.");
     await db.$connect();
-    app.listen(appConfig.port, () => console.log("Running On", appConfig.port));
+    app.listen(appConfig.port, () =>
+      logger.info("Running On", { port: appConfig.port })
+    );
   } catch (error) {
-    console.log(error);
+    logger.error("App Crashed", error);
     await db.$disconnect();
     process.exit(1);
   }

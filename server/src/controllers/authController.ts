@@ -4,6 +4,7 @@ import * as authService from "../services/authService";
 import { appConfig } from "../config/env";
 import HttpError from "../config/httpError";
 import { asyncHandler } from "../middleware/asyncHandler"; // Import the asyncHandler utility
+import logger from "../config/logger";
 
 export const registerUserHandler = asyncHandler(async (req, res, next) => {
   const userInfo = req.body as RegisterUserModel;
@@ -30,13 +31,14 @@ export const loginUserHandler = asyncHandler(async (req, res, next) => {
     httpOnly: true,
   });
 
-  res.status(201).json({ user, accessToken: tokens.accessToken });
+  res.status(200).json({ user, accessToken: tokens.accessToken });
 });
 
 export const refreshUserHandler = asyncHandler(async (req, res, next) => {
   // Extract refresh token from cookies
   const token = req.cookies?.refreshToken as string;
 
+  console.log(req.cookies);
   // If no refresh token is present, throw an error
   if (!token) {
     throw new HttpError({
