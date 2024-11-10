@@ -10,6 +10,7 @@ import ms3 from "multer-s3";
 import { s3Config } from "../config/env";
 import HttpError from "../config/httpError";
 import { db } from "../config/db";
+import logger from "../config/logger";
 
 export const allowedMimeTypes = {
   audio: [
@@ -119,15 +120,14 @@ export const upload = multer({
 });
 export const truncateAllFiles = async () => {
   try {
-    console.log("Getting S3 Files...");
+    logger.info("Getting S3 Files...");
     const { Contents: s3Files } = await s3.send(
       new ListObjectsCommand({ Bucket: s3Config.bucket })
     );
     if (s3Files) {
-      console.log("Deleting S3 Files...");
       await Promise.all(
         s3Files.map(async (file) => {
-          console.log("Deleting File: ", file.Key);
+          logger.info("Deleting File: ", file.Key);
           return await s3.send(
             new DeleteObjectCommand({
               Bucket: s3Config.bucket,
@@ -137,10 +137,14 @@ export const truncateAllFiles = async () => {
         })
       );
     }
-    console.log("Deleting Database Records");
-    await db.file.deleteMany();
+    if (s3Files?.length) {
+      logger.info("Deleting Database Records");
+      await db.file.deleteMany();
+    }
+    logger.info("Exiting, if there were found files they've been cleared out.");
+    process.exit(0);
   } catch (error) {
-    console.log(error);
+    logger.error("Something went wrong with deleting the files", error);
   }
 };
 

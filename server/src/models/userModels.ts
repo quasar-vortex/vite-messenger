@@ -77,6 +77,7 @@ export const updateUserSchema = z.object({
       .optional(),
     isVisible: z.boolean().optional(),
     notificationsEnabled: z.boolean().optional(),
+    userName: baseUser.shape.userName.optional(),
   }),
 });
 

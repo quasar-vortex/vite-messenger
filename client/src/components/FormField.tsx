@@ -2,9 +2,9 @@ import { forwardRef, MutableRefObject } from "react";
 import { IconType } from "react-icons";
 
 export type FormFieldProps = {
-  placeholder: string;
+  placeholder?: string;
   name: string;
-  type: "EMAIL" | "PASSWORD" | "TEXTAREA" | "TEXT";
+  type: "EMAIL" | "PASSWORD" | "TEXTAREA" | "TEXT" | "CHECKBOX";
   error?: string;
   icon?: IconType;
   label?: string;

@@ -15,7 +15,14 @@ export const updateUserHandler = async (
   data: UpdateUserSchema
 ) => {
   logger.info("User Update Started");
-  const { bio, isVisible, notificationsEnabled, password, newPasword } = data;
+  const {
+    bio,
+    isVisible,
+    notificationsEnabled,
+    password,
+    newPasword,
+    userName,
+  } = data;
 
   const updatePayload: Omit<
     Partial<UpdateUserSchema>,
@@ -50,6 +57,7 @@ export const updateUserHandler = async (
   if (isVisible !== undefined) updatePayload.isVisible = isVisible;
   if (notificationsEnabled !== undefined)
     updatePayload.notificationsEnabled = notificationsEnabled;
+  if (userName !== undefined) updatePayload.userName = userName;
   // Update user in database
   const updatedUser = await db.user.update({
     where: { userId },
